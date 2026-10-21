@@ -1,8 +1,10 @@
 """Notes API: a small Flask service used to demonstrate a DevSecOps pipeline."""
 
+import ipaddress
 import os
 import sqlite3
-import subprocess
+# Used only with a fixed argument list, see /ping
+import subprocess  # nosec B404
 
 from flask import Flask, g, jsonify, request
 
@@ -40,17 +42,24 @@ def create_app(db_path=None):
 
     @app.get("/ping")
     def ping():
-        # VULNERABLE (demo): command injection via shell=True
         host = request.args.get("host", "127.0.0.1")
-        out = subprocess.check_output("ping -c 1 " + host, shell=True)
-        return out.decode()
+        try:
+            ipaddress.ip_address(host)
+        except ValueError:
+            return jsonify(error="invalid host"), 400
+        # host is validated as an IP address and no shell is used
+        result = subprocess.run(  # nosec B603 B607
+            ["ping", "-c", "1", host],
+            capture_output=True, text=True, timeout=5, check=False,
+        )
+        return result.stdout
 
     @app.get("/notes")
     def list_notes():
         query = request.args.get("q", "")
-        # VULNERABLE (demo): user input concatenated into SQL
         rows = get_db().execute(
-            "SELECT id, title, body FROM notes WHERE title LIKE '%" + query + "%' ORDER BY id"
+            "SELECT id, title, body FROM notes WHERE title LIKE ? ORDER BY id",
+            (f"%{query}%",),
         ).fetchall()
         return jsonify([dict(r) for r in rows])
 
