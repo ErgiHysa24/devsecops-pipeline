@@ -21,7 +21,7 @@ Progetto dimostrativo: una piccola API di note in Flask, con una pipeline GitHub
 |-----------------------------------|-------------------------|
 | SQL injection nella ricerca       | pytest, Bandit, Semgrep |
 | Comando di sistema con `shell=True` | Bandit, Semgrep       |
-| Flask con `debug=True`            | Semgrep                 |
+| Flask con `debug=True`            | nessuno (da correggere a mano) |
 | Chiave AWS finta in `app/config.py` | Gitleaks              |
 | Flask 2.2.4, Werkzeug 2.2.2, Jinja2 3.1.2, requests 2.28.1 | pip-audit |
 
