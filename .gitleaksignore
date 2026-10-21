@@ -1,0 +1,3 @@
+# Fake demo key committed on purpose in commit 53b3bb8 (branch demo/vulnerable).
+# It gives access to nothing. A real key would have to be revoked, not ignored.
+53b3bb8f13894d52c778b8d7d334a5cfc87ff6c2:app/config.py:generic-api-key:4
