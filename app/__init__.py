@@ -2,6 +2,7 @@
 
 import os
 import sqlite3
+import subprocess
 
 from flask import Flask, g, jsonify, request
 
@@ -37,12 +38,19 @@ def create_app(db_path=None):
     def health():
         return jsonify(status="ok")
 
+    @app.get("/ping")
+    def ping():
+        # VULNERABLE (demo): command injection via shell=True
+        host = request.args.get("host", "127.0.0.1")
+        out = subprocess.check_output("ping -c 1 " + host, shell=True)
+        return out.decode()
+
     @app.get("/notes")
     def list_notes():
         query = request.args.get("q", "")
+        # VULNERABLE (demo): user input concatenated into SQL
         rows = get_db().execute(
-            "SELECT id, title, body FROM notes WHERE title LIKE ? ORDER BY id",
-            (f"%{query}%",),
+            "SELECT id, title, body FROM notes WHERE title LIKE '%" + query + "%' ORDER BY id"
         ).fetchall()
         return jsonify([dict(r) for r in rows])
 
